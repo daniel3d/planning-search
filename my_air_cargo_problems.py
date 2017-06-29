@@ -60,11 +60,12 @@ class AirCargoProblem(Problem):
             :return: list of Action objects
             """
             loads = []
+
             for c in self.cargos:
                 for p in self.planes:
                     for a in self.airports:
-                        precond_pos = [expr("At({},{})").format(a, c),
-                                        expr("At({},{})").format(p, a)]
+                        precond_pos = [expr("At({},{})".format(a, c)),
+                                        expr("At({},{})".format(p, a))]
                         precond_neg = []
                         effect_add = [expr("In({}, {})".format(c, p))]
                         effect_rem = [expr("At({}, {})".format(c, a))]
@@ -72,6 +73,7 @@ class AirCargoProblem(Problem):
                                        [precond_pos, precond_neg],
                                        [effect_add, effect_rem])
                         loads.append(load)
+
             return loads
 
         def unload_actions():
@@ -80,6 +82,7 @@ class AirCargoProblem(Problem):
             :return: list of Action objects
             """
             unloads = []
+
             for c in self.cargos:
                 for p in self.planes:
                     for a in self.airports:
@@ -92,6 +95,7 @@ class AirCargoProblem(Problem):
                                        [precond_pos, precond_neg],
                                        [effect_add, effect_rem])
                         unloads.append(unload)
+
             return unloads
 
         def fly_actions():
@@ -100,6 +104,7 @@ class AirCargoProblem(Problem):
             :return: list of Action objects
             """
             flys = []
+
             for fr in self.airports:
                 for to in self.airports:
                     if fr != to:
@@ -113,6 +118,7 @@ class AirCargoProblem(Problem):
                                          [precond_pos, precond_neg],
                                          [effect_add, effect_rem])
                             flys.append(fly)
+
             return flys
 
         return load_actions() + unload_actions() + fly_actions()
@@ -125,8 +131,14 @@ class AirCargoProblem(Problem):
             e.g. 'FTTTFF'
         :return: list of Action objects
         """
-        # TODO implement
         possible_actions = []
+
+        kb = PropKB()
+        kb.tell(decode_state(state, self.state_map).pos_sentence())
+        for a in self.actions_list:
+            if a.check_precond(kb, a.args):
+                possible_actions.append(a)
+
         return possible_actions
 
     def result(self, state: str, action: Action):
@@ -138,8 +150,22 @@ class AirCargoProblem(Problem):
         :param action: Action applied
         :return: resulting state after action
         """
-        # TODO implement
         new_state = FluentState([], [])
+        old_state = decode_state(state, self.state_map)
+
+        for f in action.effect_add:
+            if f not in new_state.pos:
+                new_state.pos.append(f)
+        for f in old_state.pos:
+            if f not in action.effect_rem:
+                new_state.pos.append(f)
+        for f in action.effect_rem:
+            if f not in new_state.neg:
+                new_state.neg.append(f)
+        for f in old_state.neg:
+            if f not in action.effect_add:
+                new_state.neg.append(f)
+
         return encode_state(new_state, self.state_map)
 
     def goal_test(self, state: str) -> bool:
