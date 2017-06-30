@@ -306,12 +306,12 @@ class PlanningGraph():
         nodes = []
 
         for action in self.all_actions:
-            A = PgNode_a(action)
-            if A.prenodes.issubset(self.s_levels[level]):
-                nodes.append(A)
-                for S in self.s_levels[level]:
-                    S.children.add(A)
-                    A.parents.add(S)
+            a = PgNode_a(action)
+            if a.prenodes.issubset(self.s_levels[level]):
+                nodes.append(a)
+                for s in self.s_levels[level]:
+                    s.children.add(a)
+                    a.parents.add(s)
 
         self.a_levels.append(nodes)
 
@@ -326,11 +326,11 @@ class PlanningGraph():
         """
         nodes = []
 
-        for A in self.a_levels[level - 1]:
-            for S in A.effnodes:
-                nodes.append(S)
-                S.parents.add(A)
-                A.children.add(S)
+        for a in self.a_levels[level - 1]:
+            for s in a.effnodes:
+                nodes.append(s)
+                s.parents.add(a)
+                a.children.add(s)
 
         self.s_levels.append(nodes)
 
@@ -427,9 +427,9 @@ class PlanningGraph():
         :param node_a2: PgNode_a
         :return: bool
         """
-        for A1 in node_a1.parents:
-            for A2 in node_a2.parents:
-                if A1.is_mutex(A2):
+        for a1 in node_a1.parents:
+            for a2 in node_a2.parents:
+                if a1.is_mutex(a2):
                     return True
 
         return False
@@ -488,9 +488,9 @@ class PlanningGraph():
         :param node_s2: PgNode_s
         :return: bool
         """
-        for S1 in node_s1.parents:
-            for S2 in node_s2.parents:
-                if not S1.is_mutex(S2):
+        for s1 in node_s1.parents:
+            for s2 in node_s2.parents:
+                if not s1.is_mutex(s2):
                     return False
 
         return True
