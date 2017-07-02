@@ -501,4 +501,11 @@ class PlanningGraph():
         :return: int
         """
         level_sum = 0
+        for goal in self.problem.goal:
+            node = PgNode_s(goal,True)
+            for level, nodes in enumerate(self.s_levels, 0):
+                if node in nodes:
+                    level_sum+=level
+                    break
+
         return level_sum
